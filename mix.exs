@@ -21,10 +21,12 @@ defmodule Southdown.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:mox, "~> 1.2.0"},
+      {:mox, "~> 1.2.0", only: [:test]},
+      {:credo, "~> 1.7.11", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.4.5", only: [:dev], runtime: false},
       {:poolboy, "~> 1.5.2"},
       {:jason, "~> 1.4.4"},
-      {:redix, "~> 1.5.2"},
+      {:redix, "~> 1.5.2"}
     ]
   end
 end

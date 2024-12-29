@@ -3,7 +3,7 @@ defmodule Southdown.SouthdownTest do
   import Mox
 
   setup do
-    Mox.verify_on_exit!
+    Mox.verify_on_exit!()
     Mox.set_mox_global()
     :ok
   end
@@ -17,7 +17,10 @@ defmodule Southdown.SouthdownTest do
 
   describe "pipeline/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :pipeline, fn _, [["SET", "key1", "value1"], ["SET", "key2", "value2"]] -> {:ok, "OK"} end)
+      expect(FauxRedix, :pipeline, fn _, [["SET", "key1", "value1"], ["SET", "key2", "value2"]] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.pipeline([["SET", "key1", "value1"], ["SET", "key2", "value2"]])
     end
   end
@@ -31,14 +34,28 @@ defmodule Southdown.SouthdownTest do
 
   describe "noreply_pipeline/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_pipeline, fn _, [["SET", "key1", "value1"], ["SET", "key2", "value2"]] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_pipeline, fn _,
+                                              [
+                                                ["SET", "key1", "value1"],
+                                                ["SET", "key2", "value2"]
+                                              ] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.noreply_pipeline([["SET", "key1", "value1"], ["SET", "key2", "value2"]])
     end
   end
 
   describe "transaction_pipeline/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :transaction_pipeline, fn _, [["SET", "key1", "value1"], ["SET", "key2", "value2"]] -> {:ok, "OK"} end)
+      expect(FauxRedix, :transaction_pipeline, fn _,
+                                                  [
+                                                    ["SET", "key1", "value1"],
+                                                    ["SET", "key2", "value2"]
+                                                  ] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.transaction_pipeline([["SET", "key1", "value1"], ["SET", "key2", "value2"]])
     end
   end
@@ -50,8 +67,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'append' multiple values" do
-      expect(FauxRedix, :command, fn _, ["RPUSH", "key", "value1", "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.append("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :command, fn _, ["RPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.append("key", ["value1", "value2", "value3"])
     end
   end
 
@@ -92,7 +112,11 @@ defmodule Southdown.SouthdownTest do
 
   describe "hmset/2" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["HMSET", "key", "field1", "value1", "field2", "value2"] -> {:ok, "OK"} end)
+      expect(FauxRedix, :command, fn _,
+                                     ["HMSET", "key", "field1", "value1", "field2", "value2"] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.hmset("key", %{"field1" => "value1", "field2" => "value2"})
     end
   end
@@ -132,8 +156,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'lpush' multiple values" do
-      expect(FauxRedix, :command, fn _, ["LPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.lpush("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :command, fn _, ["LPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.lpush("key", ["value1", "value2", "value3"])
     end
   end
 
@@ -144,8 +171,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'lpushx' multiple values" do
-      expect(FauxRedix, :command, fn _, ["LPUSHX", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.lpushx("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :command, fn _, ["LPUSHX", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.lpushx("key", ["value1", "value2", "value3"])
     end
   end
 
@@ -158,7 +188,10 @@ defmodule Southdown.SouthdownTest do
 
   describe "mset/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["MSET", "key1", "value1", "key2", "value2"] -> {:ok, "OK"} end)
+      expect(FauxRedix, :command, fn _, ["MSET", "key1", "value1", "key2", "value2"] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.mset(%{"key1" => "value1", "key2" => "value2"})
     end
   end
@@ -170,8 +203,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'prepend' multiple values" do
-      expect(FauxRedix, :command, fn _, ["LPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.prepend("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :command, fn _, ["LPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.prepend("key", ["value1", "value2", "value3"])
     end
   end
 
@@ -182,8 +218,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'rpush' multiple values" do
-      expect(FauxRedix, :command, fn _, ["RPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.rpush("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :command, fn _, ["RPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.rpush("key", ["value1", "value2", "value3"])
     end
   end
 
@@ -194,8 +233,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'rpushx' multiple values" do
-      expect(FauxRedix, :command, fn _, ["RPUSHX", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.rpushx("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :command, fn _, ["RPUSHX", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.rpushx("key", ["value1", "value2", "value3"])
     end
   end
 
@@ -235,8 +277,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'append' multiple values" do
-      expect(FauxRedix, :noreply_command, fn _, ["RPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.async_append("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :noreply_command, fn _, ["RPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_append("key", ["value1", "value2", "value3"])
       wait_for_async()
     end
   end
@@ -283,19 +328,47 @@ defmodule Southdown.SouthdownTest do
 
   describe "async_hmset/2" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_command, fn _, ["HMSET", "key", "field1", "value1", "field2", "value2"] -> {:ok, "OK"} end)
-      expect(FauxRedix, :noreply_command, fn _, ["HMSET", "key", "field3", "value3", "field4", "value4"] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_command, fn _,
+                                             [
+                                               "HMSET",
+                                               "key",
+                                               "field1",
+                                               "value1",
+                                               "field2",
+                                               "value2"
+                                             ] ->
+        {:ok, "OK"}
+      end)
+
+      expect(FauxRedix, :noreply_command, fn _,
+                                             [
+                                               "HMSET",
+                                               "key",
+                                               "field3",
+                                               "value3",
+                                               "field4",
+                                               "value4"
+                                             ] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.async_hmset("key", %{
-        "field1" => "value1", "field2" => "value2",
-        "field3" => "value3", "field4" => "value4",
+        "field1" => "value1",
+        "field2" => "value2",
+        "field3" => "value3",
+        "field4" => "value4"
       })
+
       wait_for_async()
     end
   end
 
   describe "async_hset/3" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_command, fn _, ["HSET", "key", "field", "value"] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_command, fn _, ["HSET", "key", "field", "value"] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.async_hset("key", "field", "value")
       wait_for_async()
     end
@@ -303,7 +376,10 @@ defmodule Southdown.SouthdownTest do
 
   describe "async_hsetnx/3" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_command, fn _, ["HSETNX", "key", "field", "value"] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_command, fn _, ["HSETNX", "key", "field", "value"] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.async_hsetnx("key", "field", "value")
       wait_for_async()
     end
@@ -333,8 +409,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'lpush' multiple values" do
-      expect(FauxRedix, :noreply_command, fn _, ["LPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.async_lpush("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :noreply_command, fn _, ["LPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_lpush("key", ["value1", "value2", "value3"])
       wait_for_async()
     end
   end
@@ -347,8 +426,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'lpushx' multiple values" do
-      expect(FauxRedix, :noreply_command, fn _, ["LPUSHX", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.async_lpushx("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :noreply_command, fn _, ["LPUSHX", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_lpushx("key", ["value1", "value2", "value3"])
       wait_for_async()
     end
   end
@@ -363,7 +445,10 @@ defmodule Southdown.SouthdownTest do
 
   describe "async_mset/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_command, fn _, ["MSET", "key1", "value1", "key2", "value2"] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_command, fn _, ["MSET", "key1", "value1", "key2", "value2"] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.async_mset(%{"key1" => "value1", "key2" => "value2"})
       wait_for_async()
     end
@@ -377,8 +462,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'prepend' multiple values" do
-      expect(FauxRedix, :noreply_command, fn _, ["LPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.async_prepend("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :noreply_command, fn _, ["LPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_prepend("key", ["value1", "value2", "value3"])
       wait_for_async()
     end
   end
@@ -391,8 +479,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'rpush' multiple values" do
-      expect(FauxRedix, :noreply_command, fn _, ["RPUSH", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.async_rpush("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :noreply_command, fn _, ["RPUSH", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_rpush("key", ["value1", "value2", "value3"])
       wait_for_async()
     end
   end
@@ -405,8 +496,11 @@ defmodule Southdown.SouthdownTest do
     end
 
     test "can 'rpushx' multiple values" do
-      expect(FauxRedix, :noreply_command, fn _, ["RPUSHX", "key", "value1" , "value2", "value3"] -> {:ok, "OK"} end)
-      Southdown.async_rpushx("key", ["value1" , "value2", "value3"])
+      expect(FauxRedix, :noreply_command, fn _, ["RPUSHX", "key", "value1", "value2", "value3"] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_rpushx("key", ["value1", "value2", "value3"])
       wait_for_async()
     end
   end
@@ -421,7 +515,10 @@ defmodule Southdown.SouthdownTest do
 
   describe "async_set/3" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_command, fn _, ["SET", "key", "value", "EX", 3600] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_command, fn _, ["SET", "key", "value", "EX", 3600] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.async_set("key", "value", 3600)
       wait_for_async()
     end
@@ -429,7 +526,10 @@ defmodule Southdown.SouthdownTest do
 
   describe "async_setex/3" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :noreply_command, fn _, ["SET", "key", "value", "EX", 3600] -> {:ok, "OK"} end)
+      expect(FauxRedix, :noreply_command, fn _, ["SET", "key", "value", "EX", 3600] ->
+        {:ok, "OK"}
+      end)
+
       Southdown.async_set("key", "value", 3600)
       wait_for_async()
     end
@@ -482,225 +582,293 @@ defmodule Southdown.SouthdownTest do
       assert false == Southdown.exists?("key")
     end
   end
-  
+
   describe "first/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["LINDEX", "key", 0] -> {:ok, "value"} end)
       Southdown.first("key")
     end
   end
-  
+
   describe "get/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["GET", "key"] -> {:ok, "value"} end)
       Southdown.get("key")
     end
   end
-  
+
   describe "getall/0" do
     test "issues correct arguments to adapter and returns a map" do
-      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "*"] -> {:ok, ["1", ["key1", "key2"]]} end)
-      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "*"] -> {:ok, ["0", ["key3", "key4"]]} end)
-      expect(FauxRedix, :command, fn _, ["MGET", "key1", "key2"] -> {:ok, ["value1", "value2"]} end)
-      expect(FauxRedix, :command, fn _, ["MGET", "key3", "key4"] -> {:ok, ["value3", "value4"]} end)
+      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "*"] ->
+        {:ok, ["1", ["key1", "key2"]]}
+      end)
 
-      assert {:ok, %{
-        "key1" => "value1",
-        "key2" => "value2",
-        "key3" => "value3",
-        "key4" => "value4"
-      }} = Southdown.getall()
+      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "*"] ->
+        {:ok, ["0", ["key3", "key4"]]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["MGET", "key1", "key2"] ->
+        {:ok, ["value1", "value2"]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["MGET", "key3", "key4"] ->
+        {:ok, ["value3", "value4"]}
+      end)
+
+      assert {:ok,
+              %{
+                "key1" => "value1",
+                "key2" => "value2",
+                "key3" => "value3",
+                "key4" => "value4"
+              }} = Southdown.getall()
     end
   end
-  
+
   describe "getdel/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["GETDEL", "key"] -> {:ok, "OK"} end)
       Southdown.getdel("key")
     end
   end
-  
+
   describe "getex/2" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["GET", "key", "EX", 3600] -> {:ok, "OK"} end)
       Southdown.getex("key", 3600)
     end
   end
-  
+
   describe "getlist/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["LRANGE", "key", 0, -1] -> {:ok, ["value2", "value3"]} end)
+      expect(FauxRedix, :command, fn _, ["LRANGE", "key", 0, -1] ->
+        {:ok, ["value2", "value3"]}
+      end)
+
       Southdown.getlist("key")
     end
   end
-  
+
   describe "getrange/3" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["GETRANGE", "key", 1, 10] -> {:ok, "substring"} end)
       Southdown.getrange("key", 1, 10)
     end
   end
-  
+
   describe "getset/2" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["GETSET", "key", "value"] -> {:ok, "oldvalue"} end)
       Southdown.getset("key", "value")
     end
   end
-  
+
   describe "hget/2" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["HGET", "key", "field"] -> {:ok, "value"} end)
       Southdown.hget("key", "field")
     end
   end
-  
+
   describe "hkeys/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "*"] -> {:ok, ["1", ["field1", "value1", "field2", "value2"]]} end)
-      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "*"] -> {:ok, ["0", ["field3", "value3", "field4", "value4"]]} end)
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "*"] ->
+        {:ok, ["1", ["field1", "value1", "field2", "value2"]]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "*"] ->
+        {:ok, ["0", ["field3", "value3", "field4", "value4"]]}
+      end)
 
       assert {:ok, ["field1", "field2", "field3", "field4"]} = Southdown.hkeys("key")
     end
   end
-  
+
   describe "hkeys/2" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "field*"] -> {:ok, ["1", ["field1", "value1", "field2", "value2"]]} end)
-      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "field*"] -> {:ok, ["0", ["field3", "value3", "field4", "value4"]]} end)
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "field*"] ->
+        {:ok, ["1", ["field1", "value1", "field2", "value2"]]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "field*"] ->
+        {:ok, ["0", ["field3", "value3", "field4", "value4"]]}
+      end)
 
       assert {:ok, ["field1", "field2", "field3", "field4"]} = Southdown.hkeys("key", "field*")
     end
   end
-  
+
   describe "hgetall/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["HGETALL", "key"] -> {:ok, ["field1", "value1", "field2", "value2"]} end)
-      assert {:ok, %{
-        "field1" => "value1",
-        "field2" => "value2",
-      }} = Southdown.hgetall("key")
+      expect(FauxRedix, :command, fn _, ["HGETALL", "key"] ->
+        {:ok, ["field1", "value1", "field2", "value2"]}
+      end)
+
+      assert {:ok,
+              %{
+                "field1" => "value1",
+                "field2" => "value2"
+              }} = Southdown.hgetall("key")
     end
   end
-  
+
   describe "hmget/2" do
     test "issues correct arguments to adapter when second arg is a pattern (binary)" do
-      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "field*"] -> {:ok, ["1", ["field1", "value1", "field2", "value2"]]} end)
-      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "field*"] -> {:ok, ["0", ["field3", "value3", "field4", "value4"]]} end)
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "field*"] ->
+        {:ok, ["1", ["field1", "value1", "field2", "value2"]]}
+      end)
 
-      assert {:ok, %{
-        "field1" => "value1",
-        "field2" => "value2",
-        "field3" => "value3",
-        "field4" => "value4"
-      }} = Southdown.hmget("key", "field*")
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "field*"] ->
+        {:ok, ["0", ["field3", "value3", "field4", "value4"]]}
+      end)
+
+      assert {:ok,
+              %{
+                "field1" => "value1",
+                "field2" => "value2",
+                "field3" => "value3",
+                "field4" => "value4"
+              }} = Southdown.hmget("key", "field*")
     end
 
     test "issues correct arguments to adapter when second arg is a list of fields" do
-      expect(FauxRedix, :command, fn _, ["HMGET", "key", "field1", "field2", "field3", "field4"] ->
+      expect(FauxRedix, :command, fn _,
+                                     ["HMGET", "key", "field1", "field2", "field3", "field4"] ->
         {:ok, ["value1", "value2", "value3", "value4"]}
       end)
 
-      assert {:ok, %{
-        "field1" => "value1",
-        "field2" => "value2",
-        "field3" => "value3",
-        "field4" => "value4"
-      }} = Southdown.hmget("key", ["field1", "field2", "field3", "field4"])
+      assert {:ok,
+              %{
+                "field1" => "value1",
+                "field2" => "value2",
+                "field3" => "value3",
+                "field4" => "value4"
+              }} = Southdown.hmget("key", ["field1", "field2", "field3", "field4"])
     end
   end
-  
+
   describe "keys" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "*"] -> {:ok, ["1", ["key1", "key2"]]} end)
-      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "*"] -> {:ok, ["0", ["key3", "key4"]]} end)
+      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "*"] ->
+        {:ok, ["1", ["key1", "key2"]]}
+      end)
 
-      assert {:ok, [
-        "key1",
-        "key2",
-        "key3",
-        "key4"
-      ]} = Southdown.keys()
+      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "*"] ->
+        {:ok, ["0", ["key3", "key4"]]}
+      end)
+
+      assert {:ok,
+              [
+                "key1",
+                "key2",
+                "key3",
+                "key4"
+              ]} = Southdown.keys()
     end
   end
-  
+
   describe "keys/1" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "key*"] -> {:ok, ["1", ["key1", "key2"]]} end)
-      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "key*"] -> {:ok, ["0", ["key3", "key4"]]} end)
+      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "key*"] ->
+        {:ok, ["1", ["key1", "key2"]]}
+      end)
 
-      assert {:ok, [
-        "key1",
-        "key2",
-        "key3",
-        "key4"
-      ]} = Southdown.keys("key*")
+      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "key*"] ->
+        {:ok, ["0", ["key3", "key4"]]}
+      end)
+
+      assert {:ok,
+              [
+                "key1",
+                "key2",
+                "key3",
+                "key4"
+              ]} = Southdown.keys("key*")
     end
   end
-  
+
   describe "last/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["LINDEX", "key", -1] -> {:ok, "value"} end)
       Southdown.last("key")
     end
   end
-  
+
   describe "lindex/2" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["LINDEX", "key", 2] -> {:ok, "value"} end)
       Southdown.lindex("key", 2)
     end
   end
-  
+
   describe "llen/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["LLEN", "key"] -> {:ok, 3} end)
       Southdown.llen("key")
     end
   end
-  
+
   describe "lpop/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["LPOP", "key"] -> {:ok, "value"} end)
       Southdown.lpop("key")
     end
   end
-  
+
   describe "lrange/3" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["LRANGE", "key", 2, 3] -> {:ok, ["value2", "value3"]} end)
+
       Southdown.lrange("key", 2, 3)
     end
   end
-  
+
   describe "mget/1" do
     test "issues correct arguments to adapter and returns a map when argument is a pattern (binary)" do
-      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "key*"] -> {:ok, ["1", ["key1", "key2"]]} end)
-      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "key*"] -> {:ok, ["0", ["key3", "key4"]]} end)
-      expect(FauxRedix, :command, fn _, ["MGET", "key1", "key2"] -> {:ok, ["value1", "value2"]} end)
-      expect(FauxRedix, :command, fn _, ["MGET", "key3", "key4"] -> {:ok, ["value3", "value4"]} end)
+      expect(FauxRedix, :command, fn _, ["SCAN", 0, "MATCH", "key*"] ->
+        {:ok, ["1", ["key1", "key2"]]}
+      end)
 
-      assert {:ok, %{
-        "key1" => "value1",
-        "key2" => "value2",
-        "key3" => "value3",
-        "key4" => "value4"
-      }} = Southdown.mget("key*")
+      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "key*"] ->
+        {:ok, ["0", ["key3", "key4"]]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["MGET", "key1", "key2"] ->
+        {:ok, ["value1", "value2"]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["MGET", "key3", "key4"] ->
+        {:ok, ["value3", "value4"]}
+      end)
+
+      assert {:ok,
+              %{
+                "key1" => "value1",
+                "key2" => "value2",
+                "key3" => "value3",
+                "key4" => "value4"
+              }} = Southdown.mget("key*")
     end
 
     test "issues correct arguments to adapter and returns a map when argument is a list of keys" do
-      expect(FauxRedix, :command, fn _, ["MGET", "key1", "key2"] -> {:ok, ["value1", "value2"]} end)
+      expect(FauxRedix, :command, fn _, ["MGET", "key1", "key2"] ->
+        {:ok, ["value1", "value2"]}
+      end)
 
-      assert {:ok, %{
-        "key1" => "value1",
-        "key2" => "value2"
-      }} = Southdown.mget(["key1", "key2"])
+      assert {:ok,
+              %{
+                "key1" => "value1",
+                "key2" => "value2"
+              }} = Southdown.mget(["key1", "key2"])
     end
   end
-  
+
   describe "scan/2" do
     test "issues correct arguments to adapter" do
-      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "*"] -> {:ok, ["0", ["key3", "key4"]]} end)
+      expect(FauxRedix, :command, fn _, ["SCAN", 1, "MATCH", "*"] ->
+        {:ok, ["0", ["key3", "key4"]]}
+      end)
+
       Southdown.scan(1, "*")
     end
   end

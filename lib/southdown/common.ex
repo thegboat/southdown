@@ -86,7 +86,7 @@ defmodule Southdown.Common do
       defp push(cmd, key, []), do: :ok
 
       defp push(cmd, key, list) do
-        command([cmd | [key| List.wrap(list)]])
+        command([cmd | [key | List.wrap(list)]])
       end
 
       defp map_to_pairs(map) do

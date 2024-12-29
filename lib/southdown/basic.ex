@@ -10,10 +10,15 @@ defmodule Southdown.Basic do
 
   def exists?(key) do
     case exists(key) do
-      {:ok, 1} -> true
-      {:ok, 0} -> false
+      {:ok, 1} ->
+        true
+
+      {:ok, 0} ->
+        false
+
       {:error, %{reason: reason}} ->
         raise "A Redix Error occured: #{reason}"
+
       {:error, %{message: message}} ->
         raise "A Redix Error occured: #{message}"
     end
@@ -75,9 +80,10 @@ defmodule Southdown.Basic do
 
   def hkeys(key, pattern) do
     with {:ok, result} <- auto_scan(0, [], ["HSCAN", key], pattern) do
-      no_values = result
-      |> Stream.chunk_every(2)
-      |> Enum.map(&Enum.at(&1, 0))
+      no_values =
+        result
+        |> Stream.chunk_every(2)
+        |> Enum.map(&Enum.at(&1, 0))
 
       {:ok, no_values}
     end
@@ -85,10 +91,11 @@ defmodule Southdown.Basic do
 
   def hmget(key, pattern) when is_binary(pattern) do
     with {:ok, result} <- auto_scan(0, [], ["HSCAN", key], pattern) do
-      map = result
-      |> Stream.chunk_every(2)
-      |> Stream.map(fn [k, v] -> {k, v} end)
-      |> Enum.into(%{})
+      map =
+        result
+        |> Stream.chunk_every(2)
+        |> Stream.map(fn [k, v] -> {k, v} end)
+        |> Enum.into(%{})
 
       {:ok, map}
     end
@@ -149,10 +156,10 @@ defmodule Southdown.Basic do
       keys
       |> Stream.chunk_every(chunk_size())
       |> Enum.reduce_while({:ok, %{}}, fn chunk, {:ok, acc} ->
-          case mget(chunk) do
-            {:ok, map} -> {:cont, {:ok, Map.merge(acc, map)}}
-            error -> {:halt, error}
-          end
+        case mget(chunk) do
+          {:ok, map} -> {:cont, {:ok, Map.merge(acc, map)}}
+          error -> {:halt, error}
+        end
       end)
     end
   end
@@ -186,11 +193,12 @@ defmodule Southdown.Basic do
   end
 
   defp format_hgetall({:ok, data}) do
-    map = data
-    |> Stream.chunk_every(2)
-    |> Enum.reduce(%{}, fn [f, v], acc ->
-      Map.put(acc, f, v)
-    end)
+    map =
+      data
+      |> Stream.chunk_every(2)
+      |> Enum.reduce(%{}, fn [f, v], acc ->
+        Map.put(acc, f, v)
+      end)
 
     {:ok, map}
   end
@@ -219,15 +227,17 @@ defmodule Southdown.Basic do
     |> Enum.concat([to_int(cursor), "MATCH", pattern])
     |> command()
     |> case do
-      {:error, _} = error -> 
+      {:error, _} = error ->
         error
-      {:ok, [cursor, data]} -> 
+
+      {:ok, [cursor, data]} ->
         data = Enum.concat(prev_data, data)
         auto_scan(cursor, Enum.concat(prev_data, data), cmd, pattern)
     end
   end
 
   defp to_int(int) when is_integer(int), do: int
+
   defp to_int(int) when is_binary(int) do
     String.to_integer(int)
   end

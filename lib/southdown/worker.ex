@@ -50,7 +50,7 @@ defmodule Southdown.Worker do
       :host,
       :password,
       :port,
-      :database,
+      :database
     ])
   end
 end

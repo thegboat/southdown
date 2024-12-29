@@ -3,9 +3,12 @@ defmodule Southdown.Adapter do
 
   @callback command(any(), list(String.t() | integer())) :: {:ok, any()} | {:error, any()}
   @callback pipeline(any(), list(String.t() | integer())) :: {:ok, any()} | {:error, any()}
-  @callback noreply_command(any(), list(list(String.t() | integer()))) :: {:ok, any()} | {:error, any()}
-  @callback noreply_pipeline(any(), list(list(String.t() | integer()))) :: {:ok, any()} | {:error, any()}
-  @callback transaction_pipeline(any(), list(list(String.t() | integer()))) :: {:ok, any()} | {:error, any()}
+  @callback noreply_command(any(), list(list(String.t() | integer()))) ::
+              {:ok, any()} | {:error, any()}
+  @callback noreply_pipeline(any(), list(list(String.t() | integer()))) ::
+              {:ok, any()} | {:error, any()}
+  @callback transaction_pipeline(any(), list(list(String.t() | integer()))) ::
+              {:ok, any()} | {:error, any()}
 
   def start_link(opts) do
     case impl() do
@@ -13,6 +16,7 @@ defmodule Southdown.Adapter do
       mod -> mod.start_link(opts)
     end
   end
+
   def command(conn, cmd), do: impl().command(conn, cmd)
   def pipeline(conn, cmds), do: impl().pipeline(conn, cmds)
   def noreply_command(conn, cmd), do: impl().noreply_command(conn, cmd)
