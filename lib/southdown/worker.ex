@@ -4,9 +4,10 @@ defmodule Southdown.Worker do
   """
 
   use GenServer
+  alias Southdown.Adapter
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{connection: connect()}, [])
+    GenServer.start_link(__MODULE__, %{connection: nil}, [])
   end
 
   def init(state) do
@@ -28,7 +29,7 @@ defmodule Southdown.Worker do
   end
 
   defp execute(state, exec_type, args) do
-    case apply(Redix, exec_type, [state.connection, args]) do
+    case apply(Adapter, exec_type, [state.connection, args]) do
       {:error, %Redix.ConnectionError{}} = reply ->
         {reply, Map.put(state, :connection, nil)}
 
@@ -38,17 +39,18 @@ defmodule Southdown.Worker do
   end
 
   defp connect do
-    {:ok, conn} = Redix.start_link(config())
+    {:ok, conn} = Adapter.start_link(config())
     conn
   end
 
   defp config do
-    #Keyword.delete(Application.get_all_env(:southdown), :included_applications)
-    [
-      host: "127.0.0.1",
-      password: nil,
-      port: 6379,
-      database: 1
-    ]
+    :southdown
+    |> Application.get_all_env()
+    |> Keyword.take([
+      :host,
+      :password,
+      :port,
+      :database,
+    ])
   end
 end

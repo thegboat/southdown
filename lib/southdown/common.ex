@@ -1,4 +1,4 @@
-defmodule Southdown.Modify do
+defmodule Southdown.Common do
   @moduledoc false
 
   defmacro __using__(_opts) do
@@ -27,17 +27,6 @@ defmodule Southdown.Modify do
         command(["HDEL", key, field])
       end
 
-      def hmset(key, pairs) when is_list(pairs) do
-        ["HMSET", key]
-        |> Enum.concat(pairs)
-        |> command()
-      end
-
-      def hmset(key, map) when is_map(map) do
-        pairs = map_to_pairs(map)
-        hmset(key, pairs)
-      end
-
       def hset(key, field, value) do
         command(["HSET", key, field, value])
       end
@@ -54,10 +43,6 @@ defmodule Southdown.Modify do
         command(["INCRBY", key, by])
       end
 
-      def lpop(key) do
-        command(["LPOP", key])
-      end
-
       def lpush(key, data) do
         push("LPUSH", key, data)
       end
@@ -70,24 +55,8 @@ defmodule Southdown.Modify do
         command(["LSET", key, index, value])
       end
 
-      def mset([]), do: {:ok, "OK"}
-
-      def mset(pairs) when is_list(pairs) do
-        command(["MSET" | pairs])
-      end
-
-      def mset(map) when is_map(map) do
-        map
-        |> map_to_pairs()
-        |> mset()
-      end
-
       def prepend(key, data) do
         lpush(key, data)
-      end
-
-      def rpop(key) do
-        command(["RPOP", key])
       end
 
       def rpush(key, data) do
@@ -103,7 +72,7 @@ defmodule Southdown.Modify do
       end
 
       def set(key, value, ttl) do
-        command(["SET", key, value, "EX", ttl])
+        setex(key, value, ttl)
       end
 
       def setex(key, value, ttl) do
@@ -114,7 +83,7 @@ defmodule Southdown.Modify do
         command(["SETNX", key, value])
       end
 
-      defp push(cmd, key, []), do: {:ok, "OK"}
+      defp push(cmd, key, []), do: :ok
 
       defp push(cmd, key, list) do
         command([cmd | [key| List.wrap(list)]])
@@ -126,12 +95,12 @@ defmodule Southdown.Modify do
         end)
       end
 
-      defp command(_cmd) do
-        raise "`command/1` function must be implemented."
+      defp chunk_size do
+        Application.get_env(:southdown, :chunk_size, 1000)
       end
 
-      defp command(cmd) do
-        Southdown.Core.command(cmd)
+      defp command(_cmd) do
+        raise "`command/1` function must be implemented."
       end
 
       defoverridable command: 1

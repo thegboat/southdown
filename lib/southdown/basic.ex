@@ -1,6 +1,6 @@
 defmodule Southdown.Basic do
   @moduledoc false
-  use Southdown.Modify
+  use Southdown.Common
 
   alias Southdown.Core
 
@@ -23,16 +23,20 @@ defmodule Southdown.Basic do
     lindex(key, 0)
   end
 
-  def flush_all do
+  def flushall do
     command(["FLUSHALL", "SYNC"])
   end
 
-  def flush_db do
+  def flushdb do
     command(["FLUSHDB", "SYNC"])
   end
 
   def get(key) do
     command(["GET", key])
+  end
+
+  def getall do
+    mget("*")
   end
 
   def getdel(key) do
@@ -43,6 +47,10 @@ defmodule Southdown.Basic do
     command(["GET", key, "EX", ttl])
   end
 
+  def getlist(key) do
+    lrange(key, 0, -1)
+  end
+
   def getrange(key, start_idx, end_idx) do
     command(["GETRANGE", key, start_idx, end_idx])
   end
@@ -51,38 +59,61 @@ defmodule Southdown.Basic do
     command(["GETSET", key, value])
   end
 
+  def hget(key, field) do
+    command(["HGET", key, field])
+  end
+
+  def hgetall(key) do
+    ["HGETALL", key]
+    |> command()
+    |> format_hgetall()
+  end
+
   def hkeys(key) do
     hkeys(key, "*")
   end
 
   def hkeys(key, pattern) do
-    auto_scan(0, [], ["HSCAN", key], pattern)
+    with {:ok, result} <- auto_scan(0, [], ["HSCAN", key], pattern) do
+      no_values = result
+      |> Stream.chunk_every(2)
+      |> Enum.map(&Enum.at(&1, 0))
+
+      {:ok, no_values}
+    end
   end
 
-  def hget(key, field) do
-    command(["HGET", key, field])
-  end
+  def hmget(key, pattern) when is_binary(pattern) do
+    with {:ok, result} <- auto_scan(0, [], ["HSCAN", key], pattern) do
+      map = result
+      |> Stream.chunk_every(2)
+      |> Stream.map(fn [k, v] -> {k, v} end)
+      |> Enum.into(%{})
 
-  def hget_all(key) do
-    command(["HGETALL", key])
-  end
-
-  def hget_all_as_map(key) do
-    key
-    |> hget_all()
-    |> format_mget()
+      {:ok, map}
+    end
   end
 
   def hmget(key, fields) when is_list(fields) do
-    ["HMGET", key]
-    |> Enum.concat(fields)
+    ["HMGET" | [key | fields]]
+    |> command()
+    |> format_mget(fields)
+  end
+
+  def hmset(_key, []), do: {:ok, "OK"}
+
+  def hmset(key, pairs) when is_list(pairs) do
+    ["HMSET", key]
+    |> Enum.concat(pairs)
     |> command()
   end
-  
-  def hmget_as_map(key, fields) do
-    key
-    |> hmget(fields)
-    |> format_mget(fields)
+
+  def hmset(key, map) when is_map(map) do
+    hmset(key, map_to_pairs(map))
+  end
+
+  def hscan(key, cursor, pattern) do
+    command(["HSCAN", key, cursor, "MATCH", pattern])
   end
 
   def keys do
@@ -105,31 +136,66 @@ defmodule Southdown.Basic do
     command(["LLEN", key])
   end
 
-  def mget(keys) when is_list(keys) do
-    command(["MGET" | keys])
+  def lpop(key) do
+    command(["LPOP", key])
   end
 
-  def mget_as_map(keys) do
-    keys
-    |> mget()
+  def lrange(key, start_idx, end_idx) do
+    command(["LRANGE", key, start_idx, end_idx])
+  end
+
+  def mget(pattern) when is_binary(pattern) do
+    with {:ok, keys} <- keys(pattern) do
+      keys
+      |> Stream.chunk_every(chunk_size())
+      |> Enum.reduce_while({:ok, %{}}, fn chunk, {:ok, acc} ->
+          case mget(chunk) do
+            {:ok, map} -> {:cont, {:ok, Map.merge(acc, map)}}
+            error -> {:halt, error}
+          end
+      end)
+    end
+  end
+
+  def mget([]), do: {:ok, %{}}
+
+  def mget(keys) when is_list(keys) do
+    ["MGET" | keys]
+    |> command()
     |> format_mget(keys)
   end
 
-  def scan(cursor, pattern) do
-    command(["SCAN", cursor, "MATCH #{pattern}"])
+  def mset([]), do: {:ok, "OK"}
+
+  def mset(pairs) when is_list(pairs) do
+    command(["MSET" | pairs])
   end
 
-  defp format_mget({:ok, data}) do
-    {fields, values} = data
+  def mset(map) when is_map(map) do
+    map
+    |> map_to_pairs()
+    |> mset()
+  end
+
+  def rpop(key) do
+    command(["RPOP", key])
+  end
+
+  def scan(cursor, pattern) do
+    command(["SCAN", cursor, "MATCH", pattern])
+  end
+
+  defp format_hgetall({:ok, data}) do
+    map = data
     |> Stream.chunk_every(2)
-    |> Enum.reduce({[], []}, fn [f, v], {fs, vs} ->
-      {[f | fs], [v | vs]}
+    |> Enum.reduce(%{}, fn [f, v], acc ->
+      Map.put(acc, f, v)
     end)
 
-    format_mget({:ok, values}, fields)
+    {:ok, map}
   end
 
-  defp format_mget(other), do: other
+  defp format_hgetall(other), do: other
 
   defp format_mget({:ok, []}, _keys), do: {:ok, %{}}
 

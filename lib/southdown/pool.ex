@@ -4,7 +4,6 @@ defmodule Southdown.Pool do
   """
 
   use Supervisor
-  @size 5
 
   def start_link(opts) do
     Supervisor.start_link(__MODULE__, opts)
@@ -15,7 +14,7 @@ defmodule Southdown.Pool do
     pool_opts = [
       name: {:local, :southdown},
       worker_module: Southdown.Worker,
-      size: @size,
+      size: size(),
       max_overflow: 1,
       strategy: :fifo
     ]
@@ -27,8 +26,7 @@ defmodule Southdown.Pool do
     Supervisor.init(children, strategy: :one_for_one, name: __MODULE__)
   end
 
-  @spec size :: integer
-  def size do
-    @size
+  defp size do
+    Application.get_env(:southdown, :pool_size, 5)
   end
 end
