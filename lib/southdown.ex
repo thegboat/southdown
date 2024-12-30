@@ -24,6 +24,7 @@ defmodule Southdown do
 
   @doc delegate_to: {Basic, :exists, 1}
   defdelegate exists(key), to: Basic
+  @doc delegate_to: {Basic, :exists?, 1}
   defdelegate exists?(key), to: Basic
   @doc delegate_to: {Basic, :first, 1}
   defdelegate first(key), to: Basic

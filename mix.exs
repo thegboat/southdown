@@ -25,7 +25,7 @@ defmodule Southdown.MixProject do
       {:credo, "~> 1.7.11", only: [:dev], runtime: false},
       {:dialyxir, "~> 1.4.5", only: [:dev], runtime: false},
       {:poolboy, "~> 1.5.2"},
-      {:jason, "~> 1.4.4"},
+      {:jason, "~> 1.4.4", only: [:test, :dev]},
       {:redix, "~> 1.5.2"}
     ]
   end

@@ -1,4 +1,4 @@
-defmodule Southdown.SouthdownTest do
+defmodule SouthdownTest do
   use ExUnit.Case, async: false
   import Mox
 

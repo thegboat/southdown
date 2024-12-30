@@ -3,6 +3,8 @@ defmodule Southdown.Common do
 
   defmacro __using__(_opts) do
     quote location: :keep do
+      import Southdown.Utils
+
       def append(key, data) do
         rpush(key, data)
       end
@@ -87,16 +89,6 @@ defmodule Southdown.Common do
 
       defp push(cmd, key, list) do
         command([cmd | [key | List.wrap(list)]])
-      end
-
-      defp map_to_pairs(map) do
-        Enum.flat_map(map, fn {key, value} ->
-          [key, value]
-        end)
-      end
-
-      defp chunk_size do
-        Application.get_env(:southdown, :chunk_size, 1000)
       end
 
       defp command(_cmd) do
