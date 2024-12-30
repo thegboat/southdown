@@ -1,6 +1,8 @@
 # Southdown
-A redis library
+A redis/valkey library
 **TODO: Add description**
+
+![image info](./colophon.jpg)
 
 ## Installation
 
