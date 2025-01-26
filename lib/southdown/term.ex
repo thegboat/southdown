@@ -1,4 +1,4 @@
-defmodule Southdown.Complex do
+defmodule Southdown.Term do
   @moduledoc false
   import Southdown.Utils, only: [map_to_pairs: 1]
   alias Southdown.Async
@@ -80,14 +80,14 @@ defmodule Southdown.Complex do
     |> do_mset(module)
   end
 
-  def load(binary) do
+  defp load(binary) do
     term = :erlang.binary_to_term(binary)
     {:ok, term}
   rescue
     e in ArgumentError -> {:error, e.message}
   end
 
-  def dump(term) do
+  defp dump(term) do
     :erlang.term_to_binary(term)
   end
 

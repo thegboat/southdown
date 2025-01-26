@@ -8,6 +8,16 @@ defmodule SouthdownTest do
     :ok
   end
 
+  defmodule Example do
+    defstruct [
+      :map,
+      :list,
+      :integer,
+      :float,
+      :string
+    ]
+  end
+
   describe "command/1" do
     test "issues correct arguments to adapter" do
       expect(FauxRedix, :command, fn _, ["SET", "key", "value"] -> {:ok, "OK"} end)
@@ -871,6 +881,180 @@ defmodule SouthdownTest do
 
       Southdown.scan(1, "*")
     end
+  end
+
+  describe "async_hmset_term/2" do
+    test "issues correct arguments to adapter" do
+      {struct1, dump1} = dumped()
+      {struct2, dump2} = dumped()
+      {struct3, dump3} = dumped()
+      {struct4, dump4} = dumped()
+
+      expect(FauxRedix, :noreply_command, fn _,
+                                             [
+                                               "HMSET",
+                                               "key",
+                                               "field1",
+                                               ^dump1,
+                                               "field2",
+                                               ^dump2
+                                             ] ->
+        {:ok, "OK"}
+      end)
+
+      expect(FauxRedix, :noreply_command, fn _,
+                                             [
+                                               "HMSET",
+                                               "key",
+                                               "field3",
+                                               ^dump3,
+                                               "field4",
+                                               ^dump4
+                                             ] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_hmset_term("key", %{
+        "field1" => struct1,
+        "field2" => struct2,
+        "field3" => struct3,
+        "field4" => struct4
+      })
+
+      wait_for_async()
+    end
+  end
+
+  describe "async_hset_term/3" do
+    test "issues correct arguments to adapter" do
+      {struct, dump} = dumped()
+
+      expect(FauxRedix, :noreply_command, fn _, ["HSET", "key", "field", ^dump] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_hset_term("key", "field", struct)
+      wait_for_async()
+    end
+  end
+
+  describe "async_mset_term/1" do
+    test "issues correct arguments to adapter" do
+      {struct1, dump1} = dumped()
+      {struct2, dump2} = dumped()
+
+      expect(FauxRedix, :noreply_command, fn _, ["MSET", "key1", ^dump1, "key2", ^dump2] ->
+        {:ok, "OK"}
+      end)
+
+      Southdown.async_mset_term(%{"key1" => struct1, "key2" => struct2})
+      wait_for_async()
+    end
+  end
+
+  describe "async_set_term/2" do
+    test "issues correct arguments to adapter" do
+      {struct, dump} = dumped()
+      expect(FauxRedix, :noreply_command, fn _, ["SET", "key", ^dump] -> {:ok, "OK"} end)
+      Southdown.async_set_term("key", struct)
+      wait_for_async()
+    end
+  end
+
+  describe "get_term/1" do
+    test "issues correct arguments to adapter" do
+      {struct, dump} = dumped()
+      expect(FauxRedix, :command, fn _, ["GET", "key"] -> {:ok, dump} end)
+      assert {:ok, struct} == Southdown.get_term("key")
+    end
+  end
+
+  describe "hget_term/2" do
+    test "issues correct arguments to adapter" do
+      {struct, dump} = dumped()
+      expect(FauxRedix, :command, fn _, ["HGET", "key", "field"] -> {:ok, dump} end)
+      assert {:ok, struct} == Southdown.hget_term("key", "field")
+    end
+  end
+
+  describe "hmget_term/2" do
+    test "issues correct arguments to adapter when second arg is a pattern (binary)" do
+      {struct1, dump1} = dumped()
+      {struct2, dump2} = dumped()
+      {struct3, dump3} = dumped()
+      {struct4, dump4} = dumped()
+
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 0, "MATCH", "field*"] ->
+        {:ok, ["1", ["field1", dump1, "field2", dump2]]}
+      end)
+
+      expect(FauxRedix, :command, fn _, ["HSCAN", "key", 1, "MATCH", "field*"] ->
+        {:ok, ["0", ["field3", dump3, "field4", dump4]]}
+      end)
+
+      assert {:ok,
+              %{
+                "field1" => struct1,
+                "field2" => struct2,
+                "field3" => struct3,
+                "field4" => struct4
+              }} == Southdown.hmget_term("key", "field*")
+    end
+
+    test "issues correct arguments to adapter when second arg is a list of fields" do
+      {struct1, dump1} = dumped()
+      {struct2, dump2} = dumped()
+      {struct3, dump3} = dumped()
+      {struct4, dump4} = dumped()
+
+      expect(FauxRedix, :command, fn _,
+                                     ["HMGET", "key", "field1", "field2", "field3", "field4"] ->
+        {:ok, [dump1, dump2, dump3, dump4]}
+      end)
+
+      assert {:ok,
+              %{
+                "field1" => struct1,
+                "field2" => struct2,
+                "field3" => struct3,
+                "field4" => struct4
+              }} == Southdown.hmget_term("key", ["field1", "field2", "field3", "field4"])
+    end
+  end
+
+  defp dumped do
+    struct = random_struct()
+    {struct, dump(struct)}
+  end
+
+  defp random_struct do
+    %Example{
+      map: randmap(),
+      list: randlist(),
+      integer: randint(),
+      float: randfloat(),
+      string: randstring()
+    }
+  end
+
+  defp randfloat, do: randint() + randint() / 100
+  defp randint, do: :rand.uniform(100)
+  defp randstring, do: to_string(Enum.shuffle(65..90))
+
+  defp randlist do
+    int = randint()
+    Enum.into(int..(int + 1 + randint()), [])
+  end
+
+  defp randmap do
+    randlist()
+    |> Stream.chunk_every(2, 2, :discard)
+    |> Stream.map(fn [k, v] -> {k, v} end)
+    |> Enum.into(%{})
+  end
+
+  defp dump(term) do
+    :erlang.term_to_binary(term)
   end
 
   defp wait_for_async do

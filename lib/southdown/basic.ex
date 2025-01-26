@@ -17,10 +17,10 @@ defmodule Southdown.Basic do
         false
 
       {:error, %{reason: reason}} ->
-        raise "A Redix Error occured: #{reason}"
+        raise "An Error occured: #{reason}"
 
       {:error, %{message: message}} ->
-        raise "A Redix Error occured: #{message}"
+        raise "An Error occured: #{message}"
     end
   end
 

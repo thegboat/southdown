@@ -6,11 +6,11 @@ defmodule Southdown do
   alias Southdown.Basic
   alias Southdown.Core
   alias Southdown.Pool
+  alias Southdown.Term
 
   @doc delegate_to: {Pool, :start_link, 1}
   defdelegate start_link(opts), to: Pool
 
-  @doc delegate_to: {POSAdapterClient.Backend, :all, 2}
   @doc delegate_to: {Core, :command, 1}
   defdelegate command(cmd), to: Core
   @doc delegate_to: {Core, :pipeline, 1}
@@ -124,52 +124,65 @@ defmodule Southdown do
   @doc delegate_to: {Basic, :setnx, 2}
   defdelegate setnx(key, value), to: Basic
 
-  @doc delegate_to: {Async, :async_append, 2}
+  @doc delegate_to: {Async, :append, 2}
   defdelegate async_append(key, data), to: Async, as: :append
-  @doc delegate_to: {Async, :async_decr, 1}
+  @doc delegate_to: {Async, :decr, 1}
   defdelegate async_decr(key), to: Async, as: :decr
-  @doc delegate_to: {Async, :async_decrby, 2}
+  @doc delegate_to: {Async, :decrby, 2}
   defdelegate async_decrby(key, by), to: Async, as: :decrby
-  @doc delegate_to: {Async, :async_del, 1}
+  @doc delegate_to: {Async, :del, 1}
   defdelegate async_del(key), to: Async, as: :del
-  @doc delegate_to: {Async, :async_expire, 2}
+  @doc delegate_to: {Async, :expire, 2}
   defdelegate async_expire(key, ttl), to: Async, as: :expire
-  @doc delegate_to: {Async, :async_flushall, 0}
+  @doc delegate_to: {Async, :flushall, 0}
   defdelegate async_flushall, to: Async, as: :flushall
-  @doc delegate_to: {Async, :async_flushdb, 0}
+  @doc delegate_to: {Async, :flushdb, 0}
   defdelegate async_flushdb, to: Async, as: :flushdb
-  @doc delegate_to: {Async, :async_hdel, 2}
+  @doc delegate_to: {Async, :hdel, 2}
   defdelegate async_hdel(key, field), to: Async, as: :hdel
-  @doc delegate_to: {Async, :async_hmset, 2}
+  @doc delegate_to: {Async, :hmset, 2}
   defdelegate async_hmset(key, map_or_pairs), to: Async, as: :hmset
-  @doc delegate_to: {Async, :async_hset, 3}
+  @doc delegate_to: {Async, :hset, 3}
   defdelegate async_hset(key, field, value), to: Async, as: :hset
-  @doc delegate_to: {Async, :async_hsetnx, 3}
+  @doc delegate_to: {Async, :hsetnx, 3}
   defdelegate async_hsetnx(key, field, value), to: Async, as: :hsetnx
-  @doc delegate_to: {Async, :async_incr, 1}
+  @doc delegate_to: {Async, :incr, 1}
   defdelegate async_incr(key), to: Async, as: :incr
-  @doc delegate_to: {Async, :async_incrby, 2}
+  @doc delegate_to: {Async, :incrby, 2}
   defdelegate async_incrby(key, by), to: Async, as: :incrby
-  @doc delegate_to: {Async, :async_lpush, 2}
+  @doc delegate_to: {Async, :lpush, 2}
   defdelegate async_lpush(key, data), to: Async, as: :lpush
-  @doc delegate_to: {Async, :async_lpushx, 2}
+  @doc delegate_to: {Async, :lpushx, 2}
   defdelegate async_lpushx(key, data), to: Async, as: :lpushx
-  @doc delegate_to: {Async, :async_lset, 3}
+  @doc delegate_to: {Async, :lset, 3}
   defdelegate async_lset(key, index, value), to: Async, as: :lset
-  @doc delegate_to: {Async, :async_mset, 1}
+  @doc delegate_to: {Async, :mset, 1}
   defdelegate async_mset(map_or_pairs), to: Async, as: :mset
-  @doc delegate_to: {Async, :async_prepend, 2}
+  @doc delegate_to: {Async, :prepend, 2}
   defdelegate async_prepend(key, list), to: Async, as: :prepend
-  @doc delegate_to: {Async, :async_rpush, 2}
+  @doc delegate_to: {Async, :rpush, 2}
   defdelegate async_rpush(key, data), to: Async, as: :rpush
-  @doc delegate_to: {Async, :async_rpushx, 2}
+  @doc delegate_to: {Async, :rpushx, 2}
   defdelegate async_rpushx(key, data), to: Async, as: :rpushx
-  @doc delegate_to: {Async, :async_set, 2}
+  @doc delegate_to: {Async, :set, 2}
   defdelegate async_set(key, value), to: Async, as: :set
-  @doc delegate_to: {Async, :async_set, 3}
+  @doc delegate_to: {Async, :set, 3}
   defdelegate async_set(key, value, ttl), to: Async, as: :set
-  @doc delegate_to: {Async, :async_setex, 3}
+  @doc delegate_to: {Async, :setex, 3}
   defdelegate async_setex(key, value, ttl), to: Async, as: :setex
-  @doc delegate_to: {Async, :async_setnx, 2}
+  @doc delegate_to: {Async, :setnx, 2}
   defdelegate async_setnx(key, value), to: Async, as: :setnx
+
+  defdelegate get_term(key), to: Term, as: :get
+  defdelegate hget_term(key, field), to: Term, as: :hget
+  defdelegate mget_term(any), to: Term, as: :mget
+  defdelegate hmget_term(key, any), to: Term, as: :hmget
+  defdelegate set_term(key, term), to: Term, as: :set
+  defdelegate hset_term(key, field, term), to: Term, as: :hset
+  defdelegate mset_term(any), to: Term, as: :mset
+  defdelegate hmset_term(key, any), to: Term, as: :hmset
+  defdelegate async_set_term(key, term), to: Term, as: :async_set
+  defdelegate async_hset_term(key, field, term), to: Term, as: :async_hset
+  defdelegate async_mset_term(any), to: Term, as: :async_mset
+  defdelegate async_hmset_term(key, any), to: Term, as: :async_hmset
 end
